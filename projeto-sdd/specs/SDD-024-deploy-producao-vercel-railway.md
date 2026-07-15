@@ -19,10 +19,9 @@
 
 **1. Separação em dois repositórios (públicos, no GitHub):**
 
-- `<nome>-frontend` — raiz do repositório é o conteúdo hoje em `frontend/` (movido para a raiz, não como subpasta), mais uma cópia completa de `projeto-sdd/`, `templates-sdd/`, `CLAUDE.md` e `esteira-desenvolvimento.md`, mais um `README.md` próprio (linkando de volta para o repositório de back-end).
-- `<nome>-backend` — raiz do repositório é o conteúdo hoje em `backend/` e `backend.Tests/`, mais `docker-compose.yml` e `.env.example` (ambiente de desenvolvimento local continua existindo, sem mudança), mais a mesma cópia completa de `projeto-sdd/`, `templates-sdd/`, `CLAUDE.md` e `esteira-desenvolvimento.md`, mais um `README.md` próprio (linkando de volta para o repositório de front-end).
-- Nome exato dos dois repositórios: a confirmar antes da criação (usar `<nome>` como placeholder nesta spec).
-- Como não existe nenhum commit no monorepo atual, os dois repositórios novos simplesmente começam do zero — não há histórico a dividir ou preservar.
+- [`crud-login-frontend`](https://github.com/gabrielrlima/crud-login-frontend) — `frontend/` mantido como subpasta (não flattened para a raiz — Vercel suporta "Root Directory" configurável, evitando mexer em caminho interno algum), mais uma cópia completa de `projeto-sdd/`, `templates-sdd/`, `CLAUDE.md` e `esteira-desenvolvimento.md`, mais um `README.md` próprio (linkando de volta para o repositório de back-end).
+- [`crud-login-backend`](https://github.com/gabrielrlima/crud-login-backend) — `backend/` e `backend.Tests/` mantidos como estão hoje (estrutura interna intacta, zero mudança de caminho relativo — `docker-compose.yml` e a referência de projeto de `backend.Tests` continuam corretos sem edição), mais `docker-compose.yml` e `.env.example` (ambiente de desenvolvimento local continua existindo, sem mudança), mais a mesma cópia completa de `projeto-sdd/`, `templates-sdd/`, `CLAUDE.md` e `esteira-desenvolvimento.md`, mais um `README.md` próprio (linkando de volta para o repositório de front-end).
+- Como não existia nenhum commit no monorepo original, os dois repositórios novos começaram do zero — não houve histórico a dividir ou preservar.
 
 **2. Deploy do front-end (Vercel):**
 
@@ -119,5 +118,5 @@
 ## Notas
 
 - Provedor de e-mail de produção: sugestão registrada na "Decisão de arquitetura" (qualquer provedor com SMTP relay) — confirmar a escolha final antes de implementar essa parte especificamente. Não afeta código, só configuração.
-- Nome exato dos dois repositórios: usar `<nome>-frontend`/`<nome>-backend` como placeholder nesta spec — confirmar antes da criação real dos repositórios.
+- Repositórios criados: [`crud-login-frontend`](https://github.com/gabrielrlima/crud-login-frontend) e [`crud-login-backend`](https://github.com/gabrielrlima/crud-login-backend), ambos públicos, via `gh` CLI.
 - Esta SDD resolve, de uma vez, duas decisões que vinham deliberadamente em aberto em SDDs anteriores: estratégia de deploy (`esteira-desenvolvimento.md`, etapa 8) e provedor de e-mail de produção (`SDD-013`).
