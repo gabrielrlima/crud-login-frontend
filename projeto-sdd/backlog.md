@@ -4,13 +4,13 @@
 
 ## A fazer
 
-| SDD | Título |
-|---|---|
-| `SDD-024` | Deploy em produção (Vercel + Railway) e separação em repositórios |
+_(nenhuma)_
 
 ## Em andamento
 
-_(nenhuma)_
+| SDD | Título |
+|---|---|
+| `SDD-024` | Deploy em produção (Vercel + Railway) e separação em repositórios |
 
 ## Em revisão
 
@@ -50,5 +50,5 @@ _(nenhuma ainda — "Em revisão" aqui significa implementado e autoverificado, 
 
 - Todas as 23 funcionalidades foram implementadas e verificadas (build/testes próprios passando, e a maioria com smoke test manual no navegador) — o que falta pra mover pra "Concluído" é só a revisão humana/PR, não trabalho técnico pendente.
 - `SDD-023` (GitHub OAuth) tem uma pendência adicional documentada no próprio SDD: teste de ponta a ponta real depende de um GitHub OAuth App registrado, que é um pré-requisito operacional fora do alcance de teste automatizado.
-- `SDD-024` (deploy em produção) resolve duas decisões que vinham em aberto: estratégia de deploy (`esteira-desenvolvimento.md`, etapa 8) e provedor de e-mail de produção (`SDD-013`). Passou pelo gate de entrada de "A fazer" (critérios de aceite testáveis, requisitos registrados, knowledge docs identificados) — falta confirmar o nome dos dois repositórios e o provedor de e-mail final antes de implementar.
+- `SDD-024` (deploy em produção) resolve duas decisões que vinham em aberto: estratégia de deploy (`esteira-desenvolvimento.md`, etapa 8) e provedor de e-mail de produção (`SDD-013`). Repositórios criados, front-end e back-end publicados e testados de ponta a ponta (cadastro real funcionando). Pendências antes de mover para "Em revisão": credenciais reais de SMTP e do GitHub OAuth App de produção (hoje placeholders), conectar GitHub↔Vercel para deploy automático, e registrar runner self-hosted para CI nos dois repositórios novos.
 - Próximo SDD novo começa em `SDD-025`.

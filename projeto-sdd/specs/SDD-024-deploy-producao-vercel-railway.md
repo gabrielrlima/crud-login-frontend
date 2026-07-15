@@ -2,7 +2,7 @@
 
 > Documento único desta funcionalidade — necessidade do usuário, requisitos, comportamento esperado e (quando existir) decisão de arquitetura, tudo em um só lugar. Não existem documentos separados de necessidade ou de decisão de arquitetura — o SDD é a fonte da verdade de ponta a ponta. A implementação parte daqui, nunca de instrução solta no chat.
 
-**Status:** A fazer
+**Status:** Em andamento
 
 ## Necessidade
 
@@ -87,6 +87,8 @@
 - Se um dos dois lados (front-end ou back-end) for publicado antes do outro, a variável de ambiente que aponta para o outro lado (`NEXT_PUBLIC_API_URL` ou `Frontend__Url`) fica temporariamente apontando para um endereço que ainda não existe — precisa ser atualizada assim que ambos estiverem no ar.
 - Migration nova, criada depois do primeiro deploy de produção: aplicada manualmente contra o banco de produção (não há pipeline de migration automática nesta fase — ver "Fora do escopo").
 - Provedor de e-mail escolhido atinge limite de envio (rate limit/quota do plano gratuito, por exemplo): mensagens de cadastro/recuperação de senha passam a falhar silenciosamente do ponto de vista do usuário (mesmo comportamento de falha genérica já decidido em `SDD-013`/`SDD-014`) — sem alerta automático configurado nesta fase.
+- **Achado real do primeiro deploy — tipo `citext` "desaparece" para o Npgsql após aplicar a migration:** se `dotnet ef database update` (que cria a extensão `citext` via `CREATE EXTENSION IF NOT EXISTS`) roda contra o banco de produção **depois** do processo do back-end já estar de pé, qualquer requisição que compare um valor contra a coluna `usuarios.email` (citext) falha com `System.NotSupportedException: The data type name 'citext'... could not be found in the types that were loaded by Npgsql` — mesmo com a extensão já existindo no Postgres (confirmável via `SELECT extname FROM pg_extension`). Causa: o Npgsql carrega e cacheia o catálogo de tipos do Postgres uma vez, na inicialização do pool de conexões do processo — se a extensão for criada depois desse cache já montado, o processo em execução nunca fica sabendo. **Correção:** reiniciar o serviço do back-end (`railway restart`) depois de aplicar a migration inicial — não é bug de código, é ordem de operações no primeiro deploy.
+- **Achado real do primeiro deploy — Vercel detecta "Other" em vez de "Next.js" quando o projeto é criado via `vercel project add` antes do primeiro deploy:** causa a Vercel servir os arquivos como estáticos genéricos (`Output Directory: public ou .`) em vez de usar o roteamento do Next.js — toda rota além da raiz retorna 404 (`x-vercel-error: NOT_FOUND`), mesmo com o build do `next build` concluído com sucesso nos logs. **Correção:** commitar um `vercel.json` na raiz do diretório de deploy (`frontend/vercel.json`) com `{"framework": "nextjs"}`, forçando o preset — mais robusto que configurar isso só pelo dashboard, porque fica versionado.
 
 ## Fora do escopo
 
@@ -111,9 +113,9 @@
 
 > Preenchido durante ou após o desenvolvimento — quem (ou qual agente) implementou o quê, para rastreabilidade.
 
-- **Agente/modelo utilizado:**
-- **Notas de conclusão:**
-- **Arquivos alterados:**
+- **Agente/modelo utilizado:** Claude (sessão interativa via CLI — `gh`, `railway`, `vercel`), 2026-07-15.
+- **Notas de conclusão:** Dois repositórios públicos criados via `gh repo create` (crud-login-frontend, crud-login-backend), cada um com `projeto-sdd/`/`templates-sdd/`/`CLAUDE.md`/`esteira-desenvolvimento.md` completos. Front-end publicado na Vercel (projeto `crud-login-frontend`, Root Directory implícito por rodar a partir de `frontend/`) — corrigido um problema real de detecção de framework (ver "Casos de borda"). Back-end publicado na Railway (projeto `crud-login-backend`, serviço `crud-login-backend` com Root Directory `backend`, mais serviço `Postgres` gerenciado) — as 3 migrations existentes aplicadas contra o banco de produção via `dotnet ef database update` rodado localmente contra a connection string pública da Railway; corrigido um problema real de timing do Npgsql/citext (ver "Casos de borda"). Testado de ponta a ponta em produção: cadastro de usuário via UI real (Vercel → Railway → Postgres) concluído com sucesso. **Pendências conhecidas, deploy funcional mas incompleto:** (1) `Smtp__*` e `GithubOAuth__ClientId`/`ClientSecret` configurados com placeholders na Railway — e-mail transacional e login via GitHub não funcionam de verdade em produção até serem substituídos por credenciais reais; (2) conexão GitHub↔Vercel (Login Connection da conta) e deploy automático a cada push ainda não configurados — deploy de produção hoje é manual via CLI; (3) CI (`SDD-002`) não tem runner self-hosted registrado em nenhum dos dois repositórios ainda. Revisão humana pendente.
+- **Arquivos alterados:** Criação de `crud-login-frontend/` (repositório completo) e `crud-login-backend/` (repositório completo); `frontend/vercel.json` (novo, força Framework Preset); variáveis de ambiente configuradas na Vercel (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_GITHUB_CLIENT_ID`) e na Railway (`ConnectionStrings__DefaultConnection`, `Jwt__*`, `Smtp__*`, `GithubOAuth__*`, `Frontend__Url`).
 
 ## Notas
 
