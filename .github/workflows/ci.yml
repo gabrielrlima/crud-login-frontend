@@ -1,0 +1,46 @@
+# Pipeline de CI — SDD-002 (spec: projeto-sdd/specs/SDD-002-pipeline-cicd-self-hosted.md).
+# Decisão de arquitetura: mesmo documento, seção "Decisão de arquitetura" (runner
+# self-hosted, não hospedado pelo provedor de CI).
+#
+# Este repositório contém só o front-end (ver projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md
+# para o racional da separação em dois repositórios) — este workflow cobre só lint/build do
+# front-end, sem os jobs de back-end do workflow original do monorepo. Roda direto no runner,
+# sem container (SDD-001 não containeriza o front-end).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # 1. Lint — bloqueante. Se falhar, "build" não executa.
+  lint:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint (pnpm lint)
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+
+  # 2. Build — bloqueante. Só roda se "lint" passar.
+  build:
+    runs-on: [self-hosted]
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (pnpm build)
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
