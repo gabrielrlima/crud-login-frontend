@@ -2,7 +2,10 @@
 
 Front-end (Next.js, shadcn/ui) do CRUD de login, autenticação (e-mail/senha e GitHub OAuth) e gestão de conta — cadastro, login, verificação de e-mail, recuperação de senha, consulta/atualização de perfil, troca de senha, exclusão de conta, tema claro/escuro.
 
-Repositório irmão (back-end): [crud-login-backend](https://github.com/gabrielrlima/crud-login-backend)
+**Produção:** https://crud-login-frontend-xi.vercel.app
+**Repositório irmão (back-end):** [crud-login-backend](https://github.com/gabrielrlima/crud-login-backend) — https://crud-login-backend-production.up.railway.app
+
+> **Status atual:** front-end no ar, cadastro/login por e-mail e senha testados de ponta a ponta em produção. O botão "Continuar com GitHub" está funcional (redireciona corretamente para o GitHub), mas a troca final de token no back-end ainda depende de credenciais de produção reais — ver `projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md`, "Registro de execução", para o estado exato.
 
 ## Este projeto também é material de estudo
 
@@ -29,6 +32,11 @@ Por que a decisão de arquitetura mora *dentro* do SDD, e não num documento à 
 
 > Este repositório é a metade "front-end" do projeto. `projeto-sdd/` e `templates-sdd/` são cópias completas, mantidas manualmente em sincronia com o repositório de back-end — não há automação de sync entre os dois (ver `projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md`, "Consequências").
 
+## Requisitos para rodar localmente
+
+- Node.js 20+ e [pnpm](https://pnpm.io).
+- O back-end (local via Docker, ou apontando `NEXT_PUBLIC_API_URL` para produção) rodando, já que quase toda tela chama a API.
+
 ## Ambiente de desenvolvimento local
 
 O código-fonte fica em [`frontend/`](./frontend/) (subpasta, não na raiz — o repositório também carrega `projeto-sdd/`/`templates-sdd/` ao lado).
@@ -40,6 +48,30 @@ pnpm install
 pnpm dev
 ```
 
+## Páginas
+
+| Rota | Pública ou autenticada | O que faz |
+|---|---|---|
+| `/login` | Pública | E-mail/senha ou "Continuar com GitHub" |
+| `/cadastro` | Pública | Criação de conta nova |
+| `/esqueci-senha` | Pública | Inicia a recuperação de senha |
+| `/redefinir-senha` | Pública | Define nova senha a partir do link recebido por e-mail |
+| `/verificar-email` | Pública | Confirma o e-mail a partir do link recebido por e-mail |
+| `/auth/github/callback` | Pública | Callback do OAuth do GitHub — troca o `code` por sessão |
+| `/inicio` | Autenticada | Tela inicial pós-login |
+| `/perfil` | Autenticada | Consulta/atualização de dados, troca de senha, exclusão de conta |
+
+Texto exato de cada tela (mensagens de erro, estados de loading, tempo de redirecionamento) está no "Comportamento esperado" do SDD correspondente em [`projeto-sdd/specs/`](./projeto-sdd/specs/) — não invente o texto olhando só o componente, confira a spec primeiro.
+
+## Testes
+
+```bash
+cd frontend
+pnpm test
+```
+
+109 testes hoje (Vitest + React Testing Library), um por critério de aceite das specs que já saíram do papel — se um critério de aceite não tem teste correspondente, é sinal de cobertura incompleta.
+
 ## Deploy em produção
 
-Publicado na [Vercel](https://vercel.com), com **Root Directory** configurado como `frontend` (o projeto Vercel aponta para a subpasta, não para a raiz do repositório). Ver [`projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md`](./projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md) para o comportamento esperado e a decisão de arquitetura completa — inclusive o raciocínio por trás de separar o projeto em dois repositórios em vez de manter um monorepo.
+Publicado na [Vercel](https://vercel.com), com **Root Directory** configurado como `frontend` (o projeto Vercel aponta para a subpasta, não para a raiz do repositório). Ver [`projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md`](./projeto-sdd/specs/SDD-024-deploy-producao-vercel-railway.md) para o comportamento esperado e a decisão de arquitetura completa — inclusive o raciocínio por trás de separar o projeto em dois repositórios em vez de manter um monorepo, e o achado real de deploy documentado em "Casos de borda" (Vercel detectando "Other" em vez de "Next.js" como framework preset).
